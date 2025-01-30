@@ -166,7 +166,7 @@ Content-Type: application/json
 
 {
   "to": "info@magnific.in",
-  "from": "leads@magnific.in",
+  "from": "leads@crm.magnific.in",
   "subject": "New Lead Submission",
   "data": {
     "name": string,

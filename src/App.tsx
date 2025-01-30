@@ -26,25 +26,21 @@ const App: React.FC = () => {
 
   const handleSubmit = async (data: FormData) => {
     try {
-      // Send email using your API endpoint
-      const emailResponse = await fetch('/api/send-email', {
+      const response = await fetch('/api/send-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          to: 'info@magnific.in',
-          from: 'leads@magnific.in',
-          subject: 'New Lead Submission',
-          data: {
-            ...data,
-            slugs,
-            timestamp: new Date().toISOString(),
-          },
+          name: data.name,
+          phone: data.phone,
+          city: data.city,
+          email: data.email,
+          url_slugs: slugs
         }),
       });
 
-      if (!emailResponse.ok) {
+      if (!response.ok) {
         throw new Error('Failed to send email');
       }
 
@@ -80,7 +76,7 @@ const App: React.FC = () => {
                   <Sparkles className="text-[#c8a97e] w-8 h-8" />
                 </div>
                 <h1 className="font-['Playfair_Display'] text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                  Exclusive Collection
+                 Magnific's Exclusive Collection
                 </h1>
                 <p className="text-gray-600 text-lg font-light max-w-xl mx-auto">
                   Discover our curated catalogue of premium designs. Complete the form below to receive instant access.

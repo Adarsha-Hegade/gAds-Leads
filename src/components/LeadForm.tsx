@@ -1,15 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { parsePhoneNumberFromString, getCountryCallingCode } from 'libphonenumber-js';
+import { parsePhoneNumberFromString } from 'libphonenumber-js';
 import { FormData } from '../types';
 import { Loader, Send } from 'lucide-react';
-import { put } from '@vercel/blob';
+import { supabase } from '../lib/supabase';
 
 const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ onSubmit }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
   
-  useEffect(() => {
+  React.useEffect(() => {
     // Set default country code for India (+91)
     setValue('phone', '+91 ');
   }, [setValue]);
@@ -17,24 +17,25 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
   const onSubmitForm = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // Store in Vercel Blob
-      const blobData = {
-        ...data,
-        timestamp: new Date().toISOString(),
-      };
+      // First, store in Supabase
+      const { error } = await supabase
+        .from('leads')
+        .insert([
+          {
+            name: data.name,
+            phone: data.phone,
+            city: data.city,
+            email: data.email || null,
+            url_slugs: window.location.pathname.split('/').filter(Boolean)
+          }
+        ]);
 
-      const { url } = await put(
-        `leads/${Date.now()}.json`,
-        JSON.stringify(blobData, null, 2),
-        {
-          access: 'public',
-          token: 'vercel_blob_rw_EACJHMkPH4C80esq_i4ULDf68SfRTLZGWaKt8MhASlNTN0m'
-        }
-      );
+      if (error) {
+        console.error('Supabase request failed', error);
+        throw error;
+      }
 
-      console.log('Lead stored in Blob:', url);
-      
-      // Submit to parent handler
+      // Then send email notification
       await onSubmit(data);
     } catch (error) {
       console.error('Form submission error:', error);
