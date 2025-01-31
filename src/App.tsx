@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation, Routes, Route } from 'react-router-dom';
 import LeadForm from './components/LeadForm';
 import SuccessModal from './components/SuccessModal';
@@ -14,6 +14,7 @@ const MainContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showSuccess, setShowSuccess] = useState(false);
   const location = useLocation();
+  const formRef = useRef<HTMLDivElement>(null);
   
   const slugs = location.pathname.split('/').filter(Boolean);
   const redirectUrl = `https://magnific.in${location.pathname}`;
@@ -22,6 +23,17 @@ const MainContent: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoading(false);
+      // Scroll to form after loading with a small delay to ensure smooth transition
+      setTimeout(() => {
+        if (formRef.current) {
+          const headerHeight = 80; // Approximate header height
+          const offset = formRef.current.offsetTop - headerHeight;
+          window.scrollTo({
+            top: offset,
+            behavior: 'smooth'
+          });
+        }
+      }, 100);
     }, 500);
 
     return () => clearTimeout(timer);
@@ -68,7 +80,10 @@ const MainContent: React.FC = () => {
         }}
       >
         <div className="max-w-3xl mx-auto">
-          <div className="backdrop-blur-md bg-white/80 rounded-2xl shadow-2xl p-8 md:p-12">
+          <div 
+            ref={formRef}
+            className="backdrop-blur-md bg-white/80 rounded-2xl shadow-2xl p-8 md:p-12"
+          >
             {isLoading ? (
               <div className="space-y-6">
                 <Skeleton height={50} />

@@ -6,7 +6,7 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
-            <h3 className="font-['Playfair_Display'] text-xl font-semibold mb-4">Legal</h3>
+            <h3 className="font-['Playfair_Display'] text-xl font-semibold mb-4">Important Links</h3>
             <ul className="space-y-2">
               <li>
                 <a href="https://magnific.in/terms-and-conditions/" target="_blank" rel="noopener noreferrer" className="text-gray-600 hover:text-[#1a5f7a] transition-colors">
@@ -59,6 +59,8 @@ const Footer = () => {
         <div className="mt-8 pt-8 border-t border-gray-200">
           <p className="text-center text-gray-600">
             © {new Date().getFullYear()} Magnific. All rights reserved.
+          </p> <p className="text-center text-gray-500 text-sm mt-2">
+            Developed with ❤️ by <a href="https://inktypedesign.studio/" className="hover:text-[#1a5f7a] transition-colors">Inktype Design Studio</a>
           </p>
         </div>
       </div>
