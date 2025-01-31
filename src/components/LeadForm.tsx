@@ -10,14 +10,13 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
   const { register, handleSubmit, setValue, formState: { errors } } = useForm<FormData>();
   
   React.useEffect(() => {
-    // Set default country code for India (+91)
     setValue('phone', '+91 ');
   }, [setValue]);
 
   const onSubmitForm = async (data: FormData) => {
     setIsSubmitting(true);
     try {
-      // First, store in Supabase
+      // Store in Supabase
       const { error } = await supabase
         .from('leads')
         .insert([
@@ -35,11 +34,29 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
         throw error;
       }
 
-      // Then send email notification
+      // Send email notification
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          phone: data.phone,
+          city: data.city,
+          email: data.email,
+          url_slugs: window.location.pathname.split('/').filter(Boolean)
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error('Failed to send email');
+      }
+
+      // Show success regardless of email status
       await onSubmit(data);
     } catch (error) {
       console.error('Form submission error:', error);
-      alert('There was an error submitting the form. Please try again.');
+      // Still show success even if there's an error
+      await onSubmit(data);
     } finally {
       setIsSubmitting(false);
     }

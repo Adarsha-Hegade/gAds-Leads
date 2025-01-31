@@ -1,15 +1,60 @@
-import nodemailer from 'nodemailer';
 import { FormData } from '../types';
 
-const transporter = nodemailer.createTransport({
-  host: 'mail.smtp2go.com',
-  port: 2525,
-  secure: false,
-  auth: {
-    user: 'gAdsLeads',
-    pass: process.env.SMTP_PASSWORD // This needs to be set in your environment
+const SMTP2GO_API_KEY = import.meta.env.SMTP2GO_API_KEY || 'api-BDC5B0272BD3402BBC8C5D17CF44D58F';
+const SMTP2GO_BASE_URL = 'https://api.smtp2go.com/v3/';
+
+export const sendEmail = async (data: FormData & { url_slugs: string[] }) => {
+  try {
+    const emailPayload = {
+      api_key: SMTP2GO_API_KEY,
+      to: [{ email: 'info@magnific.in', name: 'Magnific Info' }],
+      sender: { email: 'leads@crm.magnific.in', name: 'Magnific Leads' },
+      subject: `New Lead: ${data.name} from ${data.city}`,
+      html_body: createEmailHTML(data),
+      text_body: createTextBody(data),
+      custom_headers: [
+        {
+          header: 'Reply-To',
+          value: data.email || 'leads@crm.magnific.in'
+        }
+      ]
+    };
+
+    const response = await fetch(`${SMTP2GO_BASE_URL}email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify(emailPayload)
+    });
+
+    if (!response.ok) {
+      console.error('Email sending failed:', await response.json());
+      return { success: false };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return { success: false };
   }
-});
+};
+
+const createTextBody = (data: FormData & { url_slugs: string[] }) => `
+New Lead Notification
+--------------------
+
+Lead Details:
+- Name: ${data.name}
+- Phone: ${data.phone}
+- City: ${data.city}
+${data.email ? `- Email: ${data.email}` : ''}
+
+Source Information:
+- URL Path: /${data.url_slugs.join('/')}
+- Timestamp: ${new Date().toLocaleString()}
+`;
 
 const createEmailHTML = (data: FormData & { url_slugs: string[] }) => `
 <!DOCTYPE html>
@@ -66,20 +111,3 @@ const createEmailHTML = (data: FormData & { url_slugs: string[] }) => `
 </body>
 </html>
 `;
-
-export const sendLeadNotification = async (data: FormData & { url_slugs: string[] }) => {
-  const mailOptions = {
-    from: 'leads@crm.magnific.in',
-    to: 'info@magnific.in',
-    subject: `New lead from: ${data.name} - ${data.city}`,
-    html: createEmailHTML(data)
-  };
-
-  try {
-    await transporter.sendMail(mailOptions);
-    return { success: true };
-  } catch (error) {
-    console.error('Error sending email:', error);
-    throw error;
-  }
-};
