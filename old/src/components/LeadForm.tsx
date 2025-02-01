@@ -34,9 +34,28 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
         throw error;
       }
 
+      // Send email notification
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: data.name,
+          phone: data.phone,
+          city: data.city,
+          email: data.email,
+          url_slugs: window.location.pathname.split('/').filter(Boolean)
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        console.error('Failed to send email');
+      }
+
+      // Show success regardless of email status
       await onSubmit(data);
     } catch (error) {
       console.error('Form submission error:', error);
+      // Still show success even if there's an error
       await onSubmit(data);
     } finally {
       setIsSubmitting(false);
@@ -62,7 +81,7 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
           type="text"
           {...register('name', { 
             required: 'Name is required',
-            minLength: { value: 2, message: 'Name must be at least 3 characters' }
+            minLength: { value: 2, message: 'Name must be at least 2 characters' }
           })}
           placeholder="Your Name"
           autoComplete="name"
@@ -94,7 +113,7 @@ const LeadForm: React.FC<{ onSubmit: (data: FormData) => Promise<void> }> = ({ o
           type="text"
           {...register('city', { 
             required: 'City is required',
-            minLength: { value: 2, message: 'City name must be at least 3 characters' }
+            minLength: { value: 2, message: 'City name must be at least 2 characters' }
           })}
           placeholder="Your City"
           autoComplete="address-level2"

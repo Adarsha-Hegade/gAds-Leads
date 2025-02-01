@@ -1,19 +1,20 @@
 {
   "name": "magnific-lead-form",
-  "private": true,
-  "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -p tsconfig.app.json && vite build",
+    "build:api": "tsc -p tsconfig.node.json",
+    "predeploy": "npm run build && npm run build:api",
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.7",
-    "@vercel/node": "^3.0.17",
     "lucide-react": "^0.344.0",
-    "nodemailer": "^6.9.11",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.51.0",
@@ -23,7 +24,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
-    "@types/nodemailer": "^6.4.14",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

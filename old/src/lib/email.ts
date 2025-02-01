@@ -1,42 +1,47 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import nodemailer from 'nodemailer';
+import { FormData } from '../types';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+const SMTP2GO_API_KEY = import.meta.env.SMTP2GO_API_KEY || 'api-BDC5B0272BD3402BBC8C5D17CF44D58F';
+const SMTP2GO_BASE_URL = 'https://api.smtp2go.com/v3/';
 
+export const sendEmail = async (data: FormData & { url_slugs: string[] }) => {
   try {
-    const data = req.body;
-    
-    const transporter = nodemailer.createTransport({
-      host: "mail.smtp2go.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.SMTP2GO_USER,
-        pass: process.env.SMTP2GO_PASS
-      }
-    });
-
-    const mailOptions = {
-      from: '"Magnific Leads" <leads@crm.magnific.in>',
-      to: 'info@magnific.in',
-      subject: `New Lead: ${data.name} from ${data.city}`, 
-      text: createTextBody(data),
-      html: createEmailHTML(data),
-      replyTo: data.email || 'leads@crm.magnific.in'
+    const emailPayload = {
+      api_key: SMTP2GO_API_KEY,
+      to: [{ email: 'info@magnific.in', name: 'Magnific Info' }],
+      sender: { email: 'leads@crm.magnific.in', name: 'Magnific Leads' },
+      subject: `New Lead: ${data.name} from ${data.city}`,
+      html_body: createEmailHTML(data),
+      text_body: createTextBody(data),
+      custom_headers: [
+        {
+          header: 'Reply-To',
+          value: data.email || 'leads@crm.magnific.in'
+        }
+      ]
     };
 
-    await transporter.sendMail(mailOptions);
-    return res.status(200).json({ success: true });
+    const response = await fetch(`${SMTP2GO_BASE_URL}email/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify(emailPayload)
+    });
+
+    if (!response.ok) {
+      console.error('Email sending failed:', await response.json());
+      return { success: false };
+    }
+
+    return { success: true };
   } catch (error) {
     console.error('Error sending email:', error);
-    return res.status(500).json({ error: 'Failed to send email' });
+    return { success: false };
   }
-}
+};
 
-const createTextBody = (data: any) => `
+const createTextBody = (data: FormData & { url_slugs: string[] }) => `
 New Lead Notification
 --------------------
 
@@ -51,7 +56,7 @@ Source Information:
 - Timestamp: ${new Date().toLocaleString()}
 `;
 
-const createEmailHTML = (data: any) => `
+const createEmailHTML = (data: FormData & { url_slugs: string[] }) => `
 <!DOCTYPE html>
 <html>
 <head>

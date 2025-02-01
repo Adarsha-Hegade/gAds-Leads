@@ -1,6 +1,6 @@
 import { FormData } from '../types';
 
-const SMTP2GO_API_KEY = import.meta.env.SMTP2GO_API_KEY || 'api-BDC5B0272BD3402BBC8C5D17CF44D58F';
+const SMTP2GO_API_KEY = import.meta.env.VITE_SMTP2GO_API_KEY;
 const SMTP2GO_BASE_URL = 'https://api.smtp2go.com/v3/';
 
 export const sendEmail = async (data: FormData & { url_slugs: string[] }) => {

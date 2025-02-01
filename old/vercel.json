@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ],
+  "functions": {
+    "api/send-email.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+  "env": {
+    "SMTP2GO_USER": "@smtp2go_user",
+    "SMTP2GO_PASS": "@smtp2go_pass",
+    "SMTP2GO_API_KEY": "@smtp2go_api_key"
+  }
+}
