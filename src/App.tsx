@@ -18,7 +18,7 @@ const MainContent: React.FC = () => {
   
   const slugs = location.pathname.split('/').filter(Boolean);
   const redirectUrl = `https://magnific.in${location.pathname}`;
-  const catalogueUrl = 'https://drive.google.com/file/d/1u9xgGTVEpBLpfZQA5uAt_JbtNaSXTyWd/view?usp=sharing';
+  const catalogueUrl = 'https://drive.google.com/your-catalogue-link';
 
   useEffect(() => {
     const timer = setTimeout(() => {

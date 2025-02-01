@@ -2,5 +2,25 @@
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
   ],
-  "version": 2
+  "functions": {
+    "api/send-email.ts": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  },
+
+
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.mts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/$1"
+    }
+  ]
 }
